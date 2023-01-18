@@ -61,7 +61,7 @@ public class WidgetRestController {
 
         try{
             return ResponseEntity
-                    .created(new URI("/rest/widget" + newWidget.getId()))
+                    .created(new URI("/rest/widget/" + newWidget.getId()))
                     .eTag(Integer.toString(newWidget.getVersion()))
                     .body(newWidget);
         }catch (URISyntaxException e){

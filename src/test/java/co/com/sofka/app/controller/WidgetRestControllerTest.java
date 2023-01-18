@@ -1,11 +1,14 @@
 package co.com.sofka.app.controller;
 
 import co.com.sofka.app.model.Widget;
+import co.com.sofka.app.repository.WidgetRepository;
 import co.com.sofka.app.service.WidgetService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,12 +16,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Optional;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.ArgumentMatchers.any;
 
+import static org.mockito.Mockito.mockStatic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -33,6 +39,9 @@ public class WidgetRestControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private WidgetRepository widgetRepository;
 
     @Test
     @DisplayName("GET /widgets success")
@@ -77,33 +86,49 @@ public class WidgetRestControllerTest {
 
     @Test
     @DisplayName("POST /rest/widget")
-    void testCreatedWidget() throws Exception{
-        //Setup our mocked service
+    /*public void createWidget_success() throws Exception{
+        Widget record = new Widget(1l,"New Widget", "This is my widget", 1);
+        Mockito.when(widgetRepository.save(record)).thenReturn(record);
+
+        String content = this.asJsonString(record);
+        System.out.println(content);
+
+        MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/rest/widget")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(content);
+        mockMvc.perform(mockRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.name", is("New Widget")))
+                .andExpect(jsonPath("$.description", is("This is my widget")))
+                .andExpect(jsonPath("$.version", is(1)));
+    }*/
+    void testCreateWidget() throws Exception {
+        // Setup our mocked service
         Widget widgetToPost = new Widget("New Widget", "This is my widget");
         Widget widgetToReturn = new Widget(1L, "New Widget", "This is my widget", 1);
         doReturn(widgetToReturn).when(service).save(any());
 
-        //Execute the POST request
+        // Execute the POST request
         mockMvc.perform(post("/rest/widget")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(widgetToPost)))
 
-                //Validate the response code and content type
+                // Validate the response code and content type
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 
                 // Validate headers
-                .andExpect(header().string(HttpHeaders.LOCATION,
-                        "/rest/widget/1"))
+                .andExpect(header().string(HttpHeaders.LOCATION, "/rest/widget/1"))
                 .andExpect(header().string(HttpHeaders.ETAG, "\"1\""))
 
-                //Validate the returned fields
+                // Validate the returned fields
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.name", is("New Widget")))
                 .andExpect(jsonPath("$.description", is("This is my widget")))
                 .andExpect(jsonPath("$.version", is(1)));
     }
-
     private String asJsonString(final Object obj) {
         try{
             return new ObjectMapper().writeValueAsString(obj);
@@ -111,4 +136,6 @@ public class WidgetRestControllerTest {
             throw new RuntimeException(e);
         }
     }
+
+
 }
