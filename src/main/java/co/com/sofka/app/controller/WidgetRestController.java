@@ -33,7 +33,7 @@ public class WidgetRestController {
                         return ResponseEntity
                                 .ok()
                                 .eTag(Integer.toString(widget.getVersion()))
-                                .location(new URI("/rest/widget/" + widget.getId()))
+                                .location(new URI("/rest/widget/{id}" + widget.getId()))
                                 .body(widget);
                     } catch (URISyntaxException e) {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
